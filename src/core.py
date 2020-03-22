@@ -94,5 +94,5 @@ def main():
 
 if __name__ == '__main__':
     print("press CTRL + C to cancel.")
-    contador_faloumerda = 12
+    contador_faloumerda = 0
     main()
