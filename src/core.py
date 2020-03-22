@@ -6,13 +6,6 @@ from src.conf.settings import BASE_API_URL, TELEGRAM_TOKEN
 
 import emoji
 
-def start(bot, update):
-    response_message = "=^._.^="
-    bot.send_message(
-        chat_id=update.message.chat_id,
-        text=response_message
-    )
-
 
 def faloumerda_callback(bot, update, **optional_args):
     global contador_faloumerda
@@ -48,6 +41,8 @@ def faloumerda_callback(bot, update, **optional_args):
        update.message.reply_text(
             emoji.emojize("Culpa do PT, talquei?! :sunglasses: ", use_aliases=True)
         )
+
+
 def coronavirus_callback(bot, update):
     bot.sendPhoto(
         chat_id=update.message.chat_id,
@@ -61,8 +56,10 @@ def coronavirus_callback(bot, update):
     )
 
 
-def unknown(bot, update):
-    response_message = "Meow? =^._.^="
+def unknown_callback(bot, update):
+    response_message = emoji.emojize("Eu não sei esse comando, mas e o PT?\n"
+                                     "Também não sabe né?! "
+                                     "\nTalquei :sunglasses: ", use_aliases=True)
     bot.send_message(
         chat_id=update.message.chat_id,
         text=response_message
@@ -75,16 +72,13 @@ def main():
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(
-        CommandHandler('start', start)
-    )
-    dispatcher.add_handler(
         CommandHandler('coronavirus', coronavirus_callback)
     )
     dispatcher.add_handler(
         CommandHandler('faloumerda', faloumerda_callback)
     )
     dispatcher.add_handler(
-        MessageHandler(Filters.command, unknown)
+        MessageHandler(Filters.command, unknown_callback)
     )
 
     updater.start_polling()
