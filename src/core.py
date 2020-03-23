@@ -2,7 +2,7 @@ from time import sleep
 
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from src.conf.settings import BASE_API_URL, TELEGRAM_TOKEN
+from src.conf.settings import BASE_API_URL, TELEGRAM_TOKEN, BASE_API_URL_GIF_PT
 
 import emoji
 
@@ -55,6 +55,11 @@ def coronavirus_callback(bot, update):
         emoji.emojize('Talquei?! :sunglasses: :triumph:   ', use_aliases=True), quote=False
     )
 
+def pt_callback(bot, update):
+    bot.sendAnimation(
+        chat_id=update.message.chat_id,
+        animation="https://media.tenor.com/images/ec30360d8edca1ea94b7476508d8f67d/tenor.gif"
+    )
 
 def unknown_callback(bot, update):
     response_message = emoji.emojize("Eu não sei esse comando, mas e o PT?\n"
@@ -71,6 +76,9 @@ def main():
 
     dispatcher = updater.dispatcher
 
+    dispatcher.add_handler(
+        CommandHandler('pt', pt_callback)
+    )
     dispatcher.add_handler(
         CommandHandler('coronavirus', coronavirus_callback)
     )
