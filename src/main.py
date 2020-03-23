@@ -1,8 +1,12 @@
 from time import sleep
 
-from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, Dispatcher
 
-from src.conf.settings import BASE_API_URL, TELEGRAM_TOKEN, BASE_API_URL_GIF_PT
+from src.conf.settings import BASE_API_URL, TELEGRAM_TOKEN
+
+from telegram import Update, Bot
+
+import os
 
 import emoji
 
@@ -19,7 +23,7 @@ def faloumerda_callback(bot, update, **optional_args):
     sleep(0.5)
 
     update.message.reply_text(
-        "SIM!",
+        "**SIM!**",
         quote=False
     )
 
@@ -55,11 +59,13 @@ def coronavirus_callback(bot, update):
         emoji.emojize('Talquei?! :sunglasses: :triumph:   ', use_aliases=True), quote=False
     )
 
+
 def pt_callback(bot, update):
     bot.sendAnimation(
         chat_id=update.message.chat_id,
         animation="https://media.tenor.com/images/ec30360d8edca1ea94b7476508d8f67d/tenor.gif"
     )
+
 
 def unknown_callback(bot, update):
     response_message = emoji.emojize("Eu não sei esse comando, mas e o PT?\n"
@@ -71,30 +77,18 @@ def unknown_callback(bot, update):
     )
 
 
-def main():
-    updater = Updater(token=TELEGRAM_TOKEN)
+def webhook(request):
+    bot = Bot(token=os.environ["TELEGRAM_TOKEN"])
 
-    dispatcher = updater.dispatcher
+    dispatcher = Dispatcher(bot, None, 0)
 
-    dispatcher.add_handler(
-        CommandHandler('pt', pt_callback)
-    )
-    dispatcher.add_handler(
-        CommandHandler('coronavirus', coronavirus_callback)
-    )
-    dispatcher.add_handler(
-        CommandHandler('faloumerda', faloumerda_callback)
-    )
-    dispatcher.add_handler(
-        MessageHandler(Filters.command, unknown_callback)
-    )
+    dispatcher.add_handler(CommandHandler('pt', pt_callback))
+    dispatcher.add_handler(CommandHandler('coronavirus', coronavirus_callback))
+    dispatcher.add_handler(MessageHandler(Filters.command, unknown_callback))
+    dispatcher.add_handler(CommandHandler('faloumerda', faloumerda_callback))
 
-    updater.start_polling()
+    if request.method == 'POST':
+        update = Update.de_json(request.get_json(force=True), bot)
+        dispatcher.process_update(update)
+    return 'ok'
 
-    updater.idle()
-
-
-if __name__ == '__main__':
-    print("press CTRL + C to cancel.")
-    contador_faloumerda = 0
-    main()
