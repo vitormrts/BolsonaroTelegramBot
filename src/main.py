@@ -1,62 +1,62 @@
+from telegram import Bot, Update
+
 from time import sleep
 
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, Dispatcher
 
-from src.conf.settings import BASE_API_URL, TELEGRAM_TOKEN
-
-from telegram import Update, Bot
-
 import os
 
-import emoji
+import re
 
 
-def faloumerda_callback(bot, update, **optional_args):
-    global contador_faloumerda
+def teste_callback(bot, update):
 
-    contador_faloumerda += 1
+    auth = tweepy.OAuthHandler('id9ZkfAAQf2CAFAPZfuJR8Oot', 'Gumun9JsIkKg2orIpzk1ckCqsax8FxhzJxwuos4W14ZoFZxONw')
+    auth.set_access_token('2982469253-jhBGYBWFh9ev3qiYEVXbVEOozTaOXGYxv4yI2QQ','yCeNDCgLR1Zhcwqfht40ZRncxSpLA2yLoBeaJP3Y9igBq')
 
-    update.message.reply_text(
-        "O Bonoliro falou merda?",
-        quote=False)
 
-    sleep(0.5)
+    api = tweepy.API(auth)
 
-    update.message.reply_text(
-        "**SIM!**",
-        quote=False
+
+    def obter_tweets(usuario, limite=1):
+        resultados = api.user_timeline(screen_name=usuario, count=limite, tweet_mode='extended')
+        tweets = []
+        for r in resultados:
+            tweet = re.sub(r'http\S+', '', r.full_text)
+            tweets.append(tweet.replace('\n', ' '))
+        return tweets
+
+
+    tweets = obter_tweets(usuario='jairbolsonaro', limite=1)
+
+
+    def msg(bot, update):
+        update.message.reply_text(tweets, quote=False)
+
+
+def danca_callback(bot, update):
+    bot.sendAnimation(
+        chat_id=update.message.chat_id,
+        animation="https://media.giphy.com/media/dsQrhW15qfUhWjjVMl/giphy.gif"
     )
 
-    sleep(0.5)
-
-    update.message.reply_text(
-        "Quantas vezes?",
-        quote=False
+def gado_callback(bot, update):
+    bot.sendAnimation(
+        chat_id=update.message.chat_id,
+        animation="https://media.tenor.com/images/4ab2e1d37b5d71289796677692748605/tenor.gif"
     )
-
-    sleep(0.5)
-
-    update.message.reply_text(contador_faloumerda, quote=False)
-
-    if contador_faloumerda%13 == 0:
-       update.message.reply_text(
-           emoji.emojize(f"{contador_faloumerda}? {contador_faloumerda} é múltiplo de 13 :rage:", use_aliases=True)
-       ),
-       update.message.reply_text(
-            emoji.emojize("Culpa do PT, talquei?! :sunglasses: ", use_aliases=True)
-        )
 
 
 def coronavirus_callback(bot, update):
     bot.sendPhoto(
         chat_id=update.message.chat_id,
-        photo=BASE_API_URL
+        photo="https://pbs.twimg.com/media/ETZdc34WkAEA2Fh.jpg"
     )
-
-    sleep(0.5)
-
-    update.message.reply_text(
-        emoji.emojize('Talquei?! :sunglasses: :triumph:   ', use_aliases=True), quote=False
+    sleep(0.8)
+    response_message = "Talquei?! >:("
+    bot.send_message(
+        chat_id=update.message.chat_id,
+        text=response_message
     )
 
 
@@ -68,9 +68,7 @@ def pt_callback(bot, update):
 
 
 def unknown_callback(bot, update):
-    response_message = emoji.emojize("Eu não sei esse comando, mas e o PT?\n"
-                                     "Também não sabe né?! "
-                                     "\nTalquei :sunglasses: ", use_aliases=True)
+    response_message = "Eu não sei esse comando, mas e o PT?\nTambém não sabe né?!\nTalquei"
     bot.send_message(
         chat_id=update.message.chat_id,
         text=response_message
@@ -78,17 +76,20 @@ def unknown_callback(bot, update):
 
 
 def webhook(request):
+
     bot = Bot(token=os.environ["TELEGRAM_TOKEN"])
 
     dispatcher = Dispatcher(bot, None, 0)
 
-    dispatcher.add_handler(CommandHandler('pt', pt_callback))
-    dispatcher.add_handler(CommandHandler('coronavirus', coronavirus_callback))
-    dispatcher.add_handler(MessageHandler(Filters.command, unknown_callback))
-    dispatcher.add_handler(CommandHandler('faloumerda', faloumerda_callback))
 
+    dispatcher.add_handler(CommandHandler('pt', pt_callback))
+    dispatcher.add_handler(CommandHandler('faloumerda', teste_callback))
+    dispatcher.add_handler(CommandHandler('danca', danca_callback))
+    dispatcher.add_handler(CommandHandler('coronavirus', coronavirus_callback))
+    dispatcher.add_handler(CommandHandler('gado', gado_callback))
+    dispatcher.add_handler(MessageHandler(Filters.command, unknown_callback))
     if request.method == 'POST':
+        contador_faloumerda = 0
         update = Update.de_json(request.get_json(force=True), bot)
         dispatcher.process_update(update)
     return 'ok'
-
