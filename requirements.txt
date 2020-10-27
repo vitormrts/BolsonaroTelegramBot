@@ -6,7 +6,7 @@ cffi==1.14.0
 chardet==3.0.4
 chatbot==1.5.2b0
 conf==0.4.1
-cryptography==2.8
+cryptography==3.2
 decorator==4.4.2
 emoji==0.5.4
 Faker==0.9.1
